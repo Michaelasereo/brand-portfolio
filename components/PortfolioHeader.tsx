@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -65,8 +66,11 @@ interface PortfolioHeaderProps {
   profile: Profile;
 }
 
+const MOBILE_ABOUT_LINES = 3;
+
 export function PortfolioHeader({ profile }: PortfolioHeaderProps) {
   const { loaderDone } = useLoader();
+  const [aboutExpanded, setAboutExpanded] = useState(false);
 
   return (
     <header className="bg-background">
@@ -145,8 +149,19 @@ export function PortfolioHeader({ profile }: PortfolioHeaderProps) {
             animate={loaderDone ? { opacity: 1, x: 0 } : { opacity: 0, x: -80 }}
             transition={{ duration: 0.7, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
-            <div className="text-base text-muted-foreground leading-relaxed [&_a]:underline [&_a]:underline-offset-2 [&_a]:text-foreground/80 [&_a]:hover:text-foreground">
-              <MarkdownContent content={profile.about} />
+            <div>
+              <div
+                className={`text-base text-muted-foreground leading-relaxed [&_a]:underline [&_a]:underline-offset-2 [&_a]:text-foreground/80 [&_a]:hover:text-foreground lg:block ${!aboutExpanded ? "line-clamp-3 lg:line-clamp-none" : ""}`}
+              >
+                <MarkdownContent content={profile.about} />
+              </div>
+              <button
+                type="button"
+                onClick={() => setAboutExpanded((e) => !e)}
+                className="mt-2 text-sm font-medium text-[#F4F4E1] hover:underline lg:hidden"
+              >
+                {aboutExpanded ? "See less" : "See more"}
+              </button>
             </div>
             <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 sm:flex-nowrap">
               {profile.ctas
