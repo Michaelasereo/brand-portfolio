@@ -6,7 +6,7 @@ import { ProjectGrid, getFilterCount, type FilterValue } from "@/components/Proj
 
 const HOMEPAGE_MAX_PROJECTS = 4;
 import { FloatingNav } from "@/components/FloatingNav";
-import { SubstackSection } from "@/components/SubstackSection";
+import { QuoteSection } from "@/components/QuoteSection";
 import { ReviewsSection } from "@/components/ReviewsSection";
 import { Footer } from "@/components/Footer";
 import type { Project } from "@/types/database";
@@ -39,14 +39,13 @@ interface HomePageClientProps {
   projects: Project[];
   profile: Profile;
   reviews: ReviewItem[];
-  articles: SubstackArticleItem[];
+  articles?: SubstackArticleItem[];
 }
 
 export function HomePageClient({
   projects,
   profile,
   reviews,
-  articles,
 }: HomePageClientProps) {
   const [activeFilter, setActiveFilter] = useState<FilterValue>("all");
 
@@ -72,7 +71,7 @@ export function HomePageClient({
         />
       </div>
 
-      <SubstackSection profile={profile} articles={articles} />
+      <QuoteSection />
       <ReviewsSection reviews={reviews} profile={profile} />
       <Footer profile={profile} />
     </main>
