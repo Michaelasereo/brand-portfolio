@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!project) return { title: "Project Not Found" };
 
   return {
-    title: `${project.title} | ti3cket.com`,
+    title: `${project.title} | Michael's Portfolio`,
     description: project.brief ?? undefined,
   };
 }

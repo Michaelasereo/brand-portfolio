@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { ProfileSocial, ProfileCta } from "@/lib/profile-server";
 
-const SOCIAL_ICONS = ["linkedin", "x", "instagram", "behance"];
+const SOCIAL_ICONS = ["linkedin", "x", "instagram", "behance", "substack"];
 
 interface ProfileFormProps {
   profile: {
@@ -148,6 +148,9 @@ export function ProfileForm({ profile }: ProfileFormProps) {
       </div>
       <div className="space-y-2">
         <Label htmlFor="about">About</Label>
+        <p className="text-xs text-muted-foreground">
+          Use markdown for links: [link text](https://example.com)
+        </p>
         <Textarea
           id="about"
           value={formData.about}
@@ -155,6 +158,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             setFormData((d) => ({ ...d, about: e.target.value }))
           }
           rows={5}
+          placeholder="Your bio. Add links with [text](url)..."
         />
       </div>
       <div className="space-y-2">
@@ -190,7 +194,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
               className="flex-1"
             />
             <Input
-              placeholder="URL"
+              placeholder="https://linkedin.com/in/yourprofile"
               value={s.href}
               onChange={(e) => updateSocial(i, "href", e.target.value)}
               className="flex-1"
@@ -234,7 +238,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
               className="flex-1"
             />
             <Input
-              placeholder="URL"
+              placeholder="https://..."
               value={c.href}
               onChange={(e) => updateCta(i, "href", e.target.value)}
               className="flex-1"

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import type { Profile } from "@/lib/profile-server";
 import { TypewriterText } from "@/components/TypewriterText";
+import { MarkdownContent } from "@/components/MarkdownContent";
 import { useLoader } from "@/context/LoaderContext";
 
 const ICON_CLASS = "size-5 shrink-0";
@@ -88,16 +89,20 @@ export function PortfolioHeader({ profile }: PortfolioHeaderProps) {
                 />
               </div>
               <div className="flex items-center gap-3">
-                {profile.socials.map((s) => (
-                  <Link
-                    key={s.label}
-                    href={s.href}
-                    className="text-muted-foreground transition-colors hover:text-foreground"
-                    aria-label={s.label}
-                  >
-                    {SOCIAL_ICONS[s.icon] ?? SOCIAL_ICONS.linkedin}
-                  </Link>
-                ))}
+                {profile.socials
+                  .filter((s) => s.href?.trim())
+                  .map((s) => (
+                    <Link
+                      key={s.label || s.href}
+                      href={s.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-muted-foreground transition-colors hover:text-foreground"
+                      aria-label={s.label}
+                    >
+                      {SOCIAL_ICONS[s.icon] ?? SOCIAL_ICONS.linkedin}
+                    </Link>
+                  ))}
               </div>
             </motion.div>
             <motion.div
@@ -140,14 +145,18 @@ export function PortfolioHeader({ profile }: PortfolioHeaderProps) {
             animate={loaderDone ? { opacity: 1, x: 0 } : { opacity: 0, x: -80 }}
             transition={{ duration: 0.7, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
-            <p className="text-base text-muted-foreground leading-relaxed">
-              {profile.about}
-            </p>
+            <div className="text-base text-muted-foreground leading-relaxed [&_a]:underline [&_a]:underline-offset-2 [&_a]:text-foreground/80 [&_a]:hover:text-foreground">
+              <MarkdownContent content={profile.about} />
+            </div>
             <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 sm:flex-nowrap">
-              {profile.ctas.map((cta) => (
+              {profile.ctas
+                .filter((c) => c.href?.trim())
+                .map((cta) => (
                 <Link
-                  key={cta.label}
+                  key={cta.label || cta.href}
                   href={cta.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-base font-medium text-muted-foreground underline underline-offset-4 hover:text-foreground"
                 >
                   {CTA_ICONS[cta.label] ?? null}

@@ -8,6 +8,7 @@ const HOMEPAGE_MAX_PROJECTS = 4;
 import { FloatingNav } from "@/components/FloatingNav";
 import { QuoteSection } from "@/components/QuoteSection";
 import { ReviewsSection } from "@/components/ReviewsSection";
+import { ContactSection } from "@/components/ContactSection";
 import { Footer } from "@/components/Footer";
 import type { Project } from "@/types/database";
 import type { Profile } from "@/lib/profile-server";
@@ -73,6 +74,7 @@ export function HomePageClient({
 
       <QuoteSection />
       <ReviewsSection reviews={reviews} profile={profile} />
+      <ContactSection />
       <Footer profile={profile} />
     </main>
   );

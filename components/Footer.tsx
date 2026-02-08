@@ -45,16 +45,20 @@ export function Footer({ profile }: FooterProps) {
           © {profile.name} 2026. All rights reserved.
         </p>
         <div className="flex items-center gap-6">
-          {profile.socials.map((s) => (
-            <Link
-              key={s.label}
-              href={s.href}
-              className="text-muted-foreground transition-colors hover:text-foreground"
-              aria-label={s.label}
-            >
-              {SOCIAL_ICONS[s.icon] ?? SOCIAL_ICONS.linkedin}
-            </Link>
-          ))}
+          {profile.socials
+            .filter((s) => s.href?.trim())
+            .map((s) => (
+              <Link
+                key={s.label || s.href}
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground transition-colors hover:text-foreground"
+                aria-label={s.label}
+              >
+                {SOCIAL_ICONS[s.icon] ?? SOCIAL_ICONS.linkedin}
+              </Link>
+            ))}
         </div>
       </div>
     </footer>

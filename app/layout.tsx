@@ -23,10 +23,10 @@ const dmMono = DM_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "ti3cket.com | Brand Design Portfolio",
-    template: "%s | ti3cket.com",
+    default: "Michael's Portfolio",
+    template: "%s | Michael's Portfolio",
   },
-  description: "Professional brand design portfolio",
+  description: "Michael's Portfolio — Brand design, product design, and design engineering",
   metadataBase: new URL("https://ti3cket.com"),
 };
 
