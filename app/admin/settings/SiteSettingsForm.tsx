@@ -6,16 +6,42 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+const DEFAULT_PROJECTS_PER_TAB = {
+  all: 4,
+  brand_identity: 4,
+  motion: 4,
+  illustrations_decks_flyers: 4,
+} as const;
+
+const TAB_LABELS: { key: keyof typeof DEFAULT_PROJECTS_PER_TAB; label: string }[] = [
+  { key: "all", label: "Featured" },
+  { key: "brand_identity", label: "Brand Identity" },
+  { key: "motion", label: "Product Design" },
+  { key: "illustrations_decks_flyers", label: "Design Engineering" },
+];
+
 interface SiteSettings {
   id: string;
   primary_color: string;
   secondary_color: string;
   border_radius: string;
   font_family: string;
+  projects_per_tab?: Record<string, number> | null;
 }
 
 interface SiteSettingsFormProps {
   settings: SiteSettings;
+}
+
+function getProjectsPerTab(settings: SiteSettings): Record<string, number> {
+  const raw = settings.projects_per_tab;
+  if (!raw || typeof raw !== "object") return { ...DEFAULT_PROJECTS_PER_TAB };
+  return {
+    all: Number(raw.all) || DEFAULT_PROJECTS_PER_TAB.all,
+    brand_identity: Number(raw.brand_identity) || DEFAULT_PROJECTS_PER_TAB.brand_identity,
+    motion: Number(raw.motion) || DEFAULT_PROJECTS_PER_TAB.motion,
+    illustrations_decks_flyers: Number(raw.illustrations_decks_flyers) || DEFAULT_PROJECTS_PER_TAB.illustrations_decks_flyers,
+  };
 }
 
 export function SiteSettingsForm({ settings }: SiteSettingsFormProps) {
@@ -26,6 +52,7 @@ export function SiteSettingsForm({ settings }: SiteSettingsFormProps) {
     secondary_color: settings.secondary_color,
     border_radius: settings.border_radius,
     font_family: settings.font_family,
+    projects_per_tab: getProjectsPerTab(settings),
   });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -112,6 +139,35 @@ export function SiteSettingsForm({ settings }: SiteSettingsFormProps) {
           }
           placeholder="Inter, sans-serif"
         />
+      </div>
+      <div className="space-y-4">
+        <Label>Projects per tab (homepage)</Label>
+        <p className="text-sm text-muted-foreground">
+          Number of case studies to show in each tab. Tab badges show this count (capped by how many exist).
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {TAB_LABELS.map(({ key, label }) => (
+            <div key={key} className="space-y-2">
+              <Label htmlFor={`projects_per_tab_${key}`}>{label}</Label>
+              <Input
+                id={`projects_per_tab_${key}`}
+                type="number"
+                min={1}
+                max={50}
+                value={formData.projects_per_tab[key]}
+                onChange={(e) =>
+                  setFormData((d) => ({
+                    ...d,
+                    projects_per_tab: {
+                      ...d.projects_per_tab,
+                      [key]: Math.min(50, Math.max(1, parseInt(e.target.value, 10) || 1)),
+                    },
+                  }))
+                }
+              />
+            </div>
+          ))}
+        </div>
       </div>
       <Button type="submit" disabled={loading}>
         {loading ? "Saving..." : "Save Settings"}

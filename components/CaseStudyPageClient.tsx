@@ -15,11 +15,19 @@ function categoryToFilter(category: ProjectCategory): FilterValue {
   return category as FilterValue;
 }
 
+const DEFAULT_PROJECTS_PER_TAB: Record<FilterValue, number> = {
+  all: 4,
+  brand_identity: 4,
+  motion: 4,
+  illustrations_decks_flyers: 4,
+};
+
 interface CaseStudyPageClientProps {
   project: Project;
   sections: ProjectSection[];
   projects: Project[];
   profile: Profile;
+  projectsPerTab?: Record<FilterValue, number>;
 }
 
 export function CaseStudyPageClient({
@@ -27,14 +35,15 @@ export function CaseStudyPageClient({
   sections,
   projects,
   profile,
+  projectsPerTab = DEFAULT_PROJECTS_PER_TAB,
 }: CaseStudyPageClientProps) {
   const router = useRouter();
   const activeFilter = categoryToFilter(project.category);
   const counts = {
-    all: projects.length,
-    brand_identity: getFilterCount(projects, "brand_identity"),
-    motion: getFilterCount(projects, "motion"),
-    illustrations_decks_flyers: getFilterCount(projects, "illustrations_decks_flyers"),
+    all: Math.min(projectsPerTab.all, projects.length),
+    brand_identity: Math.min(projectsPerTab.brand_identity, getFilterCount(projects, "brand_identity")),
+    motion: Math.min(projectsPerTab.motion, getFilterCount(projects, "motion")),
+    illustrations_decks_flyers: Math.min(projectsPerTab.illustrations_decks_flyers, getFilterCount(projects, "illustrations_decks_flyers")),
   };
 
   return (

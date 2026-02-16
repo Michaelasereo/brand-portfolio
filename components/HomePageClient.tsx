@@ -3,8 +3,6 @@
 import { useState } from "react";
 import { PortfolioHeader } from "@/components/PortfolioHeader";
 import { ProjectGrid, getFilterCount, type FilterValue } from "@/components/ProjectGrid";
-
-const HOMEPAGE_MAX_PROJECTS = 4;
 import { FloatingNav } from "@/components/FloatingNav";
 import { QuoteSection } from "@/components/QuoteSection";
 import { ReviewsSection } from "@/components/ReviewsSection";
@@ -36,22 +34,35 @@ const FILTERS: FilterValue[] = [
   "illustrations_decks_flyers",
 ];
 
+const DEFAULT_PROJECTS_PER_TAB: Record<FilterValue, number> = {
+  all: 4,
+  brand_identity: 4,
+  motion: 4,
+  illustrations_decks_flyers: 4,
+};
+
 interface HomePageClientProps {
   projects: Project[];
   profile: Profile;
   reviews: ReviewItem[];
   articles?: SubstackArticleItem[];
+  projectsPerTab?: Record<FilterValue, number>;
 }
 
 export function HomePageClient({
   projects,
   profile,
   reviews,
+  projectsPerTab = DEFAULT_PROJECTS_PER_TAB,
 }: HomePageClientProps) {
   const [activeFilter, setActiveFilter] = useState<FilterValue>("all");
 
   const counts = Object.fromEntries(
-    FILTERS.map((f) => [f, getFilterCount(projects, f)])
+    FILTERS.map((f) => {
+      const total = getFilterCount(projects, f);
+      const limit = projectsPerTab[f] ?? 4;
+      return [f, Math.min(limit, total)];
+    })
   ) as Partial<Record<FilterValue, number>>;
 
   return (
@@ -68,7 +79,7 @@ export function HomePageClient({
         <ProjectGrid
           projects={projects}
           activeCategory={activeFilter}
-          maxProjects={HOMEPAGE_MAX_PROJECTS}
+          maxProjects={projectsPerTab[activeFilter] ?? 4}
         />
       </div>
 

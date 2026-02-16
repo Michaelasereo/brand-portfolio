@@ -38,13 +38,25 @@ export default async function ProjectPage({ params }: Props) {
 
   if (error || !project) notFound();
 
-  const { data: projects } = await supabase
-    .from("projects")
-    .select("*")
-    .order("sort_order", { ascending: true });
+  const [{ data: projects }, { data: settings }] = await Promise.all([
+    supabase.from("projects").select("*").order("sort_order", { ascending: true }),
+    supabase.from("site_settings").select("projects_per_tab").limit(1).single(),
+  ]);
 
   const sections: ProjectSection[] = project.sections ?? [];
   const profile = await getProfile();
+
+  const raw = settings?.projects_per_tab;
+  const DEFAULT = { all: 4, brand_identity: 4, motion: 4, illustrations_decks_flyers: 4 } as const;
+  const projectsPerTab =
+    raw && typeof raw === "object" && !Array.isArray(raw)
+      ? {
+          all: Number((raw as Record<string, unknown>).all) || DEFAULT.all,
+          brand_identity: Number((raw as Record<string, unknown>).brand_identity) || DEFAULT.brand_identity,
+          motion: Number((raw as Record<string, unknown>).motion) || DEFAULT.motion,
+          illustrations_decks_flyers: Number((raw as Record<string, unknown>).illustrations_decks_flyers) || DEFAULT.illustrations_decks_flyers,
+        }
+      : DEFAULT;
 
   return (
     <CaseStudyPageClient
@@ -52,6 +64,7 @@ export default async function ProjectPage({ params }: Props) {
       sections={sections}
       projects={(projects ?? []) as Project[]}
       profile={profile}
+      projectsPerTab={projectsPerTab}
     />
   );
 }
