@@ -102,6 +102,8 @@ export function ProjectForm({ project }: ProjectFormProps) {
   const [heroFile, setHeroFile] = useState<File | null>(null);
   const [processFiles, setProcessFiles] = useState<File[]>([]);
   const [companyLogoFile, setCompanyLogoFile] = useState<File | null>(null);
+  const [sectionImageFiles, setSectionImageFiles] = useState<(File | null)[]>([]);
+  const [sectionGalleryFiles, setSectionGalleryFiles] = useState<(File[] | null)[]>([]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -142,14 +144,45 @@ export function ProjectForm({ project }: ProjectFormProps) {
         .map((s) => s.trim())
         .filter(Boolean);
 
-      const sections = formData.sections
-        .filter((s) => s.heading || s.description || s.image || (s.gallery_images ?? []).length > 0)
-        .map((s) => ({
+      const sectionsRaw = formData.sections;
+      const sections: typeof sectionsRaw = [];
+      for (let i = 0; i < sectionsRaw.length; i++) {
+        const s = sectionsRaw[i];
+        let image = s.image || undefined;
+        if (sectionImageFiles[i]) {
+          image = await uploadFile(
+            sectionImageFiles[i]!,
+            `section-${i}-image-${Date.now()}`
+          );
+        }
+        let gallery_images = s.gallery_images?.filter(Boolean) ?? [];
+        if (
+          (s.type === "strategy" || s.type === "system") &&
+          sectionGalleryFiles[i]?.length
+        ) {
+          const uploaded = await Promise.all(
+            sectionGalleryFiles[i].map((f, j) =>
+              uploadFile(f, `section-${i}-gallery-${Date.now()}-${j}`)
+            )
+          );
+          gallery_images = [...gallery_images, ...uploaded].slice(0, 4);
+        } else {
+          gallery_images = gallery_images.slice(0, 4);
+        }
+        sections.push({
           ...s,
           tag_color: s.tag_color || undefined,
-          image: s.image || undefined,
-          gallery_images: s.gallery_images?.filter(Boolean) ?? [],
-        }));
+          image,
+          gallery_images,
+        });
+      }
+      const sectionsFiltered = sections.filter(
+        (s) =>
+          s.heading ||
+          s.description ||
+          s.image ||
+          (s.gallery_images ?? []).length > 0
+      );
 
       const sectionGalleries: Record<string, string[]> = {};
       for (const id of SECTION_GALLERY_IDS) {
@@ -177,7 +210,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
           .split(",")
           .map((t) => t.trim())
           .filter(Boolean),
-        sections,
+        sections: sectionsFiltered,
         results: formData.results || null,
         markdown_content: formData.markdown_content || null,
         process_gallery_urls: processUrls,
@@ -553,10 +586,40 @@ export function ProjectForm({ project }: ProjectFormProps) {
                 }
                 placeholder="https://..."
               />
+              <p className="text-sm text-muted-foreground">Or upload image</p>
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  setSectionImageFiles((prev) => {
+                    const next = [...prev];
+                    next[i] = e.target.files?.[0] ?? null;
+                    return next;
+                  });
+                }}
+              />
+              {!sectionImageFiles[i] && section.image && (
+                <p className="text-sm text-muted-foreground">
+                  Current: {section.image}
+                </p>
+              )}
             </div>
             {(section.type === "strategy" || section.type === "system") && (
               <div className="space-y-2">
                 <Label>Gallery Images (1–4 URLs for marquee)</Label>
+                <p className="text-sm text-muted-foreground">Or upload 1–4 images</p>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => {
+                    setSectionGalleryFiles((prev) => {
+                      const next = [...prev];
+                      next[i] = Array.from(e.target.files ?? []).slice(0, 4);
+                      return next;
+                    });
+                  }}
+                />
                 <Textarea
                   value={(section.gallery_images ?? []).join("\n")}
                   onChange={(e) =>
