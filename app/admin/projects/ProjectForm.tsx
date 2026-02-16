@@ -156,12 +156,13 @@ export function ProjectForm({ project }: ProjectFormProps) {
           );
         }
         let gallery_images = s.gallery_images?.filter(Boolean) ?? [];
+        const galleryFiles = sectionGalleryFiles[i];
         if (
           (s.type === "strategy" || s.type === "system") &&
-          sectionGalleryFiles[i]?.length
+          galleryFiles?.length
         ) {
           const uploaded = await Promise.all(
-            sectionGalleryFiles[i].map((f, j) =>
+            galleryFiles.map((f, j) =>
               uploadFile(f, `section-${i}-gallery-${Date.now()}-${j}`)
             )
           );
