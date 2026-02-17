@@ -13,6 +13,8 @@ export async function POST(request: Request) {
       company_name: body.company_name ?? null,
       company_logo_url: body.company_logo_url ?? null,
       callout_heading: body.callout_heading ?? null,
+      intro_heading: body.intro_heading ?? null,
+      intro_description: body.intro_description ?? null,
       category: body.category,
       thumbnail_url: body.thumbnail_url,
       hero_image_url: body.hero_image_url ?? null,
@@ -28,6 +30,8 @@ export async function POST(request: Request) {
       process_gallery_urls: body.process_gallery_urls ?? [],
       gallery_urls: body.gallery_urls ?? [],
       section_galleries: body.section_galleries ?? {},
+      section_subheading_after: body.section_subheading_after ?? {},
+      section_subtitle_after: body.section_subtitle_after ?? {},
       reviews: body.reviews ?? [],
       sort_order: body.sort_order ?? 0,
     });

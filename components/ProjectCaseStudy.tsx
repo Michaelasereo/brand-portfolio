@@ -13,8 +13,9 @@ const ACCENT = "#F4F4E1";
 // Fixed section structure
 const SECTIONS = [
   { id: "intro", num: "01", title: "INTRO" },
-  { id: "process", num: "02", title: "PROCESS" },
-  { id: "system", num: "03", title: "SYSTEM" },
+  { id: "problem", num: "02", title: "THE PROBLEM" },
+  { id: "process", num: "03", title: "PROCESS" },
+  { id: "system", num: "04", title: "SYSTEM" },
   { id: "gallery", num: "4a", title: "GALLERY" },
   { id: "takeaways", num: "4b", title: "KEY TAKEAWAYS & NEXT STEPS" },
   { id: "reviews", num: "05", title: "REVIEWS" },
@@ -35,6 +36,8 @@ export function ProjectCaseStudy({ project, sections, profile }: ProjectCaseStud
   const companyName = project.company_name ?? project.title;
   const year = project.year ?? new Date().getFullYear().toString();
   const calloutHeading = project.callout_heading ?? project.tagline ?? project.title;
+  const introHeading = project.intro_heading ?? calloutHeading;
+  const introDescription = project.intro_description ?? project.brief;
   const dmMono = "var(--font-dm-mono), monospace";
 
   return (
@@ -120,18 +123,48 @@ export function ProjectCaseStudy({ project, sections, profile }: ProjectCaseStud
       {/* Fixed sections: 01 INTRO, 02 PROCESS, 03 SYSTEM, 4a GALLERY, 4b KEY TAKEAWAYS, 05 REVIEWS */}
       {SECTIONS.map((sec) => {
         const dmMono = "var(--font-dm-mono), monospace";
+        const problemSection = sections.find((s) => s.type === "problem");
         const systemSection = sections.find((s) => s.type === "system");
         const strategySection = sections.find((s) => s.type === "strategy");
         const galleryImages = project.gallery_urls ?? [];
         const reviews = project.reviews ?? [];
         const sectionGalleries = project.section_galleries ?? {};
+        const sectionSubheadingAfter = project.section_subheading_after ?? {};
+        const sectionSubtitleAfter = project.section_subtitle_after ?? {};
 
         const getSectionGallery = (id: string): string[] => {
           let arr: string[] | undefined;
-          if (id === "process") arr = strategySection?.gallery_images;
+          if (id === "problem") arr = problemSection?.gallery_images;
+          else if (id === "process") arr = strategySection?.gallery_images;
           else if (id === "system") arr = systemSection?.gallery_images;
           arr = arr ?? sectionGalleries[id];
           return Array.isArray(arr) ? arr : [];
+        };
+
+        const SectionCaptionsAfter = ({ sectionId }: { sectionId: string }) => {
+          const subheading = sectionSubheadingAfter[sectionId];
+          const subtitle = sectionSubtitleAfter[sectionId];
+          if (!subheading && !subtitle) return null;
+          return (
+            <div className="mt-6 space-y-2">
+              {subheading && (
+                <p
+                  className="font-medium text-foreground"
+                  style={{ fontFamily: dmMono, fontSize: "18px" }}
+                >
+                  {subheading}
+                </p>
+              )}
+              {subtitle && (
+                <p
+                  className="text-base text-muted-foreground"
+                  style={{ fontFamily: dmMono }}
+                >
+                  {subtitle}
+                </p>
+              )}
+            </div>
+          );
         };
 
         const SectionBlock = ({
@@ -171,38 +204,70 @@ export function ProjectCaseStudy({ project, sections, profile }: ProjectCaseStud
             return (
               <div key={sec.id}>
                 <SectionBlock>
-                  {calloutHeading && (
-                  <p
-                    className="font-medium leading-[1.3] text-foreground"
-                    style={{ fontFamily: dmMono, fontSize: "24px" }}
-                  >
-                    {calloutHeading}
-                  </p>
-                )}
-                {project.brief && (
-                  <div
-                    className="text-base leading-relaxed text-muted-foreground"
-                    style={{ fontFamily: dmMono }}
-                  >
-                    <p>{project.brief}</p>
+                  {introHeading && (
+                    <p
+                      className="font-medium leading-[1.3] text-foreground"
+                      style={{ fontFamily: dmMono, fontSize: "24px" }}
+                    >
+                      {introHeading}
+                    </p>
+                  )}
+                  {introDescription && (
+                    <div
+                      className="text-base leading-relaxed text-muted-foreground"
+                      style={{ fontFamily: dmMono }}
+                    >
+                      <p>{introDescription}</p>
+                    </div>
+                  )}
+                </SectionBlock>
+                {introGallery.length >= 1 && (
+                  <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                    <SectionGallery images={introGallery} altPrefix="Intro" />
+                    <SectionCaptionsAfter sectionId="intro" />
                   </div>
                 )}
-                {heroImage && (
-                  <div className="overflow-hidden rounded-md">
-                    <ProjectSectionImage
-                      src={heroImage}
-                      alt={project.title}
-                      loading="lazy"
-                    />
+              </div>
+            );
+          }
+          case "problem": {
+            const problemGallery = getSectionGallery("problem");
+            return (
+              <div key={sec.id}>
+                <SectionBlock show={!!problemSection}>
+                  {problemSection?.subtitle && (
+                    <p
+                      className="font-medium leading-[1.3] text-foreground"
+                      style={{ fontFamily: dmMono, fontSize: "24px" }}
+                    >
+                      {problemSection.subtitle}
+                    </p>
+                  )}
+                  {problemSection?.description && (
+                    <div
+                      className="text-base leading-relaxed text-muted-foreground"
+                      style={{ fontFamily: dmMono }}
+                    >
+                      <MarkdownContent content={problemSection.description} />
+                    </div>
+                  )}
+                  {problemSection?.image && (
+                    <div className="overflow-hidden rounded-md">
+                      <ProjectSectionImage
+                        src={problemSection.image}
+                        alt={problemSection.heading}
+                        loading="lazy"
+                      />
+                    </div>
+                  )}
+                </SectionBlock>
+                {problemGallery.length >= 1 && (
+                  <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                    <SectionGallery images={problemGallery} altPrefix="Problem" />
+                    <SectionCaptionsAfter sectionId="problem" />
                   </div>
                 )}
-              </SectionBlock>
-              {introGallery.length >= 1 && introGallery.length <= 4 && (
-                <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-                  <SectionGallery images={introGallery} altPrefix="Intro" />
-                </div>
-              )}
-            </div>
+              </div>
             );
           }
           case "process": {
@@ -246,9 +311,10 @@ export function ProjectCaseStudy({ project, sections, profile }: ProjectCaseStud
                   </div>
                 )}
               </SectionBlock>
-              {processGallery.length >= 1 && processGallery.length <= 4 && (
+              {processGallery.length >= 1 && (
                 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
                   <SectionGallery images={processGallery} altPrefix="Process" />
+                  <SectionCaptionsAfter sectionId="process" />
                 </div>
               )}
             </div>
@@ -285,9 +351,10 @@ export function ProjectCaseStudy({ project, sections, profile }: ProjectCaseStud
                   </div>
                 )}
               </SectionBlock>
-              {systemGallery.length >= 1 && systemGallery.length <= 4 && (
+              {systemGallery.length >= 1 && (
                 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
                   <SectionGallery images={systemGallery} altPrefix="System" />
+                  <SectionCaptionsAfter sectionId="system" />
                 </div>
               )}
             </div>
@@ -316,9 +383,10 @@ export function ProjectCaseStudy({ project, sections, profile }: ProjectCaseStud
                     ))}
                 </div>
               </SectionBlock>
-              {gallerySectionGallery.length >= 1 && gallerySectionGallery.length <= 4 && (
+              {gallerySectionGallery.length >= 1 && (
                 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
                   <SectionGallery images={gallerySectionGallery} altPrefix="Gallery" />
+                  <SectionCaptionsAfter sectionId="gallery" />
                 </div>
               )}
             </div>
@@ -342,9 +410,10 @@ export function ProjectCaseStudy({ project, sections, profile }: ProjectCaseStud
                   )}
                 </div>
               </SectionBlock>
-              {takeawaysGallery.length >= 1 && takeawaysGallery.length <= 4 && (
+              {takeawaysGallery.length >= 1 && (
                 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
                   <SectionGallery images={takeawaysGallery} altPrefix="Takeaways" />
+                  <SectionCaptionsAfter sectionId="takeaways" />
                 </div>
               )}
             </div>
@@ -391,9 +460,10 @@ export function ProjectCaseStudy({ project, sections, profile }: ProjectCaseStud
                   ))}
                 </div>
               </SectionBlock>
-              {reviewsGallery.length >= 1 && reviewsGallery.length <= 4 && (
+              {reviewsGallery.length >= 1 && (
                 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
                   <SectionGallery images={reviewsGallery} altPrefix="Reviews" />
+                  <SectionCaptionsAfter sectionId="reviews" />
                 </div>
               )}
             </div>

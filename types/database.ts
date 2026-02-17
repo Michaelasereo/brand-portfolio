@@ -14,6 +14,7 @@ export type ProjectCategory =
   | "marketing_assets";
 
 export type ProjectSectionType =
+  | "problem"
   | "strategy"
   | "system"
   | "touchpoints"
@@ -37,6 +38,8 @@ export interface Project {
   company_logo_url?: string | null;
   company_name?: string | null;
   callout_heading?: string | null;
+  intro_heading?: string | null;
+  intro_description?: string | null;
   category: ProjectCategory;
   thumbnail_url: string;
   hero_image_url: string | null;
@@ -50,6 +53,8 @@ export interface Project {
   process_gallery_urls: string[];
   gallery_urls?: string[] | null;
   section_galleries?: Record<string, string[]> | null;
+  section_subheading_after?: Record<string, string> | null;
+  section_subtitle_after?: Record<string, string> | null;
   results: string | null;
   markdown_content: string | null;
   reviews?: Array<{ companyName: string; logo?: string; quote: string; author: string; role: string }> | null;

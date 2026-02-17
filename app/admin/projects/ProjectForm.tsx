@@ -16,6 +16,7 @@ import {
 import type { Project, ProjectCategory, ProjectSection, ProjectSectionType } from "@/types/database";
 
 const SECTION_TYPES: { value: ProjectSectionType; label: string }[] = [
+  { value: "problem", label: "The Problem" },
   { value: "strategy", label: "Strategy" },
   { value: "system", label: "System" },
   { value: "touchpoints", label: "Touchpoints" },
@@ -51,6 +52,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
 
   const SECTION_GALLERY_IDS = [
     "intro",
+    "problem",
     "process",
     "system",
     "gallery",
@@ -63,6 +65,21 @@ export function ProjectForm({ project }: ProjectFormProps) {
       return acc;
     },
     {} as Record<string, string[]>
+  );
+
+  const defaultSectionSubheadingAfter: Record<string, string> = SECTION_GALLERY_IDS.reduce(
+    (acc, id) => {
+      acc[id] = (project?.section_subheading_after ?? {})[id] ?? "";
+      return acc;
+    },
+    {} as Record<string, string>
+  );
+  const defaultSectionSubtitleAfter: Record<string, string> = SECTION_GALLERY_IDS.reduce(
+    (acc, id) => {
+      acc[id] = (project?.section_subtitle_after ?? {})[id] ?? "";
+      return acc;
+    },
+    {} as Record<string, string>
   );
 
   const defaultReviews = (project?.reviews ?? []).map((r) => ({
@@ -80,6 +97,8 @@ export function ProjectForm({ project }: ProjectFormProps) {
     company_name: project?.company_name ?? "",
     company_logo_url: project?.company_logo_url ?? "",
     callout_heading: project?.callout_heading ?? "",
+    intro_heading: project?.intro_heading ?? "",
+    intro_description: project?.intro_description ?? "",
     category: (project?.category ?? "brand_identity") as ProjectCategory,
     thumbnail_url: project?.thumbnail_url ?? "",
     hero_image_url: project?.hero_image_url ?? "",
@@ -94,6 +113,8 @@ export function ProjectForm({ project }: ProjectFormProps) {
     process_urls: (project?.process_gallery_urls ?? []).join("\n"),
     gallery_urls: (project?.gallery_urls ?? []).join("\n"),
     section_galleries: defaultSectionGalleries,
+    section_subheading_after: defaultSectionSubheadingAfter,
+    section_subtitle_after: defaultSectionSubtitleAfter,
     sort_order: project?.sort_order ?? 0,
     sections: defaultSections,
     reviews: defaultReviews,
@@ -104,6 +125,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
   const [companyLogoFile, setCompanyLogoFile] = useState<File | null>(null);
   const [sectionImageFiles, setSectionImageFiles] = useState<(File | null)[]>([]);
   const [sectionGalleryFiles, setSectionGalleryFiles] = useState<(File[] | null)[]>([]);
+  const [sectionGalleryFilesById, setSectionGalleryFilesById] = useState<Record<string, File[]>>({});
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -158,7 +180,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
         let gallery_images = s.gallery_images?.filter(Boolean) ?? [];
         const galleryFiles = sectionGalleryFiles[i];
         if (
-          (s.type === "strategy" || s.type === "system") &&
+          (s.type === "problem" || s.type === "strategy" || s.type === "system") &&
           galleryFiles?.length
         ) {
           const uploaded = await Promise.all(
@@ -187,8 +209,26 @@ export function ProjectForm({ project }: ProjectFormProps) {
 
       const sectionGalleries: Record<string, string[]> = {};
       for (const id of SECTION_GALLERY_IDS) {
-        const urls = (formData.section_galleries[id] ?? []).filter(Boolean);
+        let urls = (formData.section_galleries[id] ?? []).filter(Boolean);
+        const files = sectionGalleryFilesById[id];
+        if (files?.length) {
+          const uploaded = await Promise.all(
+            files.map((f, j) =>
+              uploadFile(f, `section-gallery-${id}-${Date.now()}-${j}`)
+            )
+          );
+          urls = [...urls, ...uploaded];
+        }
         if (urls.length > 0) sectionGalleries[id] = urls;
+      }
+
+      const sectionSubheadingAfter: Record<string, string> = {};
+      const sectionSubtitleAfter: Record<string, string> = {};
+      for (const id of SECTION_GALLERY_IDS) {
+        const h = (formData.section_subheading_after ?? {})[id]?.trim();
+        const s = (formData.section_subtitle_after ?? {})[id]?.trim();
+        if (h) sectionSubheadingAfter[id] = h;
+        if (s) sectionSubtitleAfter[id] = s;
       }
 
       const payload = {
@@ -199,6 +239,8 @@ export function ProjectForm({ project }: ProjectFormProps) {
         company_name: formData.company_name || null,
         company_logo_url: companyLogoUrl || null,
         callout_heading: formData.callout_heading || null,
+        intro_heading: formData.intro_heading || null,
+        intro_description: formData.intro_description || null,
         category: formData.category,
         thumbnail_url: thumbnailUrl,
         hero_image_url: heroUrl || null,
@@ -217,6 +259,8 @@ export function ProjectForm({ project }: ProjectFormProps) {
         process_gallery_urls: processUrls,
         gallery_urls: galleryUrls,
         section_galleries: sectionGalleries,
+        section_subheading_after: sectionSubheadingAfter,
+        section_subtitle_after: sectionSubtitleAfter,
         reviews: formData.reviews.filter((r) => r.quote || r.companyName),
         sort_order: formData.sort_order,
       };
@@ -361,6 +405,27 @@ export function ProjectForm({ project }: ProjectFormProps) {
               placeholder="Large heading in header right column"
             />
           </div>
+          <div className="space-y-2">
+            <Label>Intro Heading (01 INTRO section only)</Label>
+            <Input
+              value={formData.intro_heading}
+              onChange={(e) =>
+                setFormData((d) => ({ ...d, intro_heading: e.target.value }))
+              }
+              placeholder="Leave empty to use Callout Heading"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Intro Description (01 INTRO section only)</Label>
+            <Textarea
+              value={formData.intro_description}
+              onChange={(e) =>
+                setFormData((d) => ({ ...d, intro_description: e.target.value }))
+              }
+              rows={3}
+              placeholder="Leave empty to use Brief"
+            />
+          </div>
         </div>
       </details>
       <div className="space-y-2">
@@ -488,7 +553,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
         />
       </div>
       <div className="space-y-6">
-        <Label className="text-base font-medium">Sections (Strategy, System, Touchpoints, Impact)</Label>
+        <Label className="text-base font-medium">Sections (The Problem, Strategy, System, Touchpoints, Impact)</Label>
         {formData.sections.map((section, i) => (
           <div
             key={section.type}
@@ -605,10 +670,10 @@ export function ProjectForm({ project }: ProjectFormProps) {
                 </p>
               )}
             </div>
-            {(section.type === "strategy" || section.type === "system") && (
+            {(section.type === "problem" || section.type === "strategy" || section.type === "system") && (
               <div className="space-y-2">
-                <Label>Gallery Images (1–4 URLs for marquee)</Label>
-                <p className="text-sm text-muted-foreground">Or upload 1–4 images</p>
+                <Label>Gallery Images (multiple = carousel)</Label>
+                <p className="text-sm text-muted-foreground">Or upload images</p>
                 <Input
                   type="file"
                   accept="image/*"
@@ -681,11 +746,23 @@ export function ProjectForm({ project }: ProjectFormProps) {
               rows={3}
             />
           </div>
-          <div className="space-y-2">
-            <Label>Section Galleries (intro, process, system, gallery, takeaways, reviews – 1–4 URLs each)</Label>
+          <div className="space-y-4">
+            <Label>Section Galleries (intro, problem, process, system, gallery, takeaways, reviews)</Label>
             {SECTION_GALLERY_IDS.map((id) => (
-              <div key={id} className="rounded border p-2">
-                <Label className="text-xs">{id}</Label>
+              <div key={id} className="rounded border p-3 space-y-2">
+                <Label className="text-xs font-medium">{id}</Label>
+                <p className="text-xs text-muted-foreground">Upload images (multiple = carousel)</p>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => {
+                    setSectionGalleryFilesById((prev) => ({
+                      ...prev,
+                      [id]: Array.from(e.target.files ?? []),
+                    }));
+                  }}
+                />
                 <Textarea
                   value={(formData.section_galleries[id] ?? []).join("\n")}
                   onChange={(e) =>
@@ -701,9 +778,43 @@ export function ProjectForm({ project }: ProjectFormProps) {
                     }))
                   }
                   rows={2}
-                  placeholder="One URL per line"
+                  placeholder="Or paste URLs, one per line"
                   className="mt-1"
                 />
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Sub-heading after images (optional)</Label>
+                    <Input
+                      value={(formData.section_subheading_after ?? {})[id] ?? ""}
+                      onChange={(e) =>
+                        setFormData((d) => ({
+                          ...d,
+                          section_subheading_after: {
+                            ...(d.section_subheading_after ?? {}),
+                            [id]: e.target.value,
+                          },
+                        }))
+                      }
+                      placeholder="Optional"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Subtitle after images (optional)</Label>
+                    <Input
+                      value={(formData.section_subtitle_after ?? {})[id] ?? ""}
+                      onChange={(e) =>
+                        setFormData((d) => ({
+                          ...d,
+                          section_subtitle_after: {
+                            ...(d.section_subtitle_after ?? {}),
+                            [id]: e.target.value,
+                          },
+                        }))
+                      }
+                      placeholder="Optional"
+                    />
+                  </div>
+                </div>
               </div>
             ))}
           </div>
