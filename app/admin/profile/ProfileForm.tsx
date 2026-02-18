@@ -149,7 +149,10 @@ export function ProfileForm({ profile }: ProfileFormProps) {
       <div className="space-y-2">
         <Label htmlFor="about">About</Label>
         <p className="text-xs text-muted-foreground">
-          Use markdown for links: [link text](https://example.com)
+          Use markdown for links: [link text](https://example.com). For lists use{" "}
+          <code className="rounded bg-muted px-1">-</code> or{" "}
+          <code className="rounded bg-muted px-1">*</code> for bullets,{" "}
+          <code className="rounded bg-muted px-1">1.</code> for numbered lists.
         </p>
         <Textarea
           id="about"

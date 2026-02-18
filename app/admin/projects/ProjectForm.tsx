@@ -624,6 +624,11 @@ export function ProjectForm({ project }: ProjectFormProps) {
             </div>
             <div className="space-y-2">
               <Label>Description (markdown)</Label>
+              <p className="text-xs text-muted-foreground">
+                Lists: use <code className="rounded bg-muted px-1">-</code> or{" "}
+                <code className="rounded bg-muted px-1">*</code> for bullets,{" "}
+                <code className="rounded bg-muted px-1">1.</code> for numbered.
+              </p>
               <Textarea
                 value={section.description}
                 onChange={(e) =>
@@ -885,6 +890,11 @@ export function ProjectForm({ project }: ProjectFormProps) {
       </div>
       <div className="space-y-2">
         <Label>Markdown Content (optional, overrides Results if set)</Label>
+        <p className="text-xs text-muted-foreground">
+          Lists: use <code className="rounded bg-muted px-1">-</code> or{" "}
+          <code className="rounded bg-muted px-1">*</code> for bullets,{" "}
+          <code className="rounded bg-muted px-1">1.</code> for numbered.
+        </p>
         <Textarea
           value={formData.markdown_content}
           onChange={(e) =>
