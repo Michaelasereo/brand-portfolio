@@ -262,7 +262,7 @@ export function ProjectCaseStudy({ project, sections, profile }: ProjectCaseStud
                   )}
                   {(problemSection?.stacked_images?.length ?? 0) > 0 && (
                     <div className="flex flex-col gap-4">
-                      {(problemSection.stacked_images ?? []).slice(0, 3).map((url, idx) => (
+                      {(problemSection?.stacked_images ?? []).slice(0, 3).map((url, idx) => (
                         <div key={idx} className="overflow-hidden rounded-md">
                           <ProjectSectionImage
                             src={url}
@@ -329,7 +329,7 @@ export function ProjectCaseStudy({ project, sections, profile }: ProjectCaseStud
                 )}
                 {(strategySection?.stacked_images?.length ?? 0) > 0 && (
                   <div className="flex flex-col gap-4">
-                    {(strategySection.stacked_images ?? []).slice(0, 3).map((url, idx) => (
+                    {(strategySection?.stacked_images ?? []).slice(0, 3).map((url, idx) => (
                       <div key={idx} className="overflow-hidden rounded-md">
                         <ProjectSectionImage
                           src={url}
@@ -382,7 +382,7 @@ export function ProjectCaseStudy({ project, sections, profile }: ProjectCaseStud
                 )}
                 {(systemSection?.stacked_images?.length ?? 0) > 0 && (
                   <div className="flex flex-col gap-4">
-                    {(systemSection.stacked_images ?? []).slice(0, 3).map((url, idx) => (
+                    {(systemSection?.stacked_images ?? []).slice(0, 3).map((url, idx) => (
                       <div key={idx} className="overflow-hidden rounded-md">
                         <ProjectSectionImage
                           src={url}
