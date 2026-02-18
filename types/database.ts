@@ -28,6 +28,8 @@ export interface ProjectSection {
   image?: string;
   tag_color?: string;
   gallery_images?: string[];
+  /** Optional: up to 3 images that stack vertically (distinct from gallery carousel). */
+  stacked_images?: string[];
 }
 
 export interface Project {

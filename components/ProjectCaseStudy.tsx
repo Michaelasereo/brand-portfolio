@@ -260,6 +260,19 @@ export function ProjectCaseStudy({ project, sections, profile }: ProjectCaseStud
                       />
                     </div>
                   )}
+                  {(problemSection?.stacked_images?.length ?? 0) > 0 && (
+                    <div className="flex flex-col gap-4">
+                      {(problemSection.stacked_images ?? []).slice(0, 3).map((url, idx) => (
+                        <div key={idx} className="overflow-hidden rounded-md">
+                          <ProjectSectionImage
+                            src={url}
+                            alt={`${problemSection?.heading ?? "Problem"} ${idx + 1}`}
+                            loading="lazy"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </SectionBlock>
                 {problemGallery.length >= 1 && (
                   <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -272,9 +285,13 @@ export function ProjectCaseStudy({ project, sections, profile }: ProjectCaseStud
           }
           case "process": {
             const processGallery = getSectionGallery("process");
+            const showProcess =
+              !!strategySection ||
+              (project.process_gallery_urls?.length ?? 0) > 0 ||
+              processGallery.length >= 1;
             return (
               <div key={sec.id}>
-              <SectionBlock show={(strategySection || project.process_gallery_urls?.length) ? true : false}>
+              <SectionBlock show={showProcess}>
                 {strategySection?.subtitle && (
                   <p
                     className="font-medium leading-[1.3] text-foreground"
@@ -305,6 +322,19 @@ export function ProjectCaseStudy({ project, sections, profile }: ProjectCaseStud
                           sizes="(max-width: 640px) 100vw, 33vw"
                           loading="lazy"
                           className="object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {(strategySection?.stacked_images?.length ?? 0) > 0 && (
+                  <div className="flex flex-col gap-4">
+                    {(strategySection.stacked_images ?? []).slice(0, 3).map((url, idx) => (
+                      <div key={idx} className="overflow-hidden rounded-md">
+                        <ProjectSectionImage
+                          src={url}
+                          alt={`${strategySection?.heading ?? "Process"} ${idx + 1}`}
+                          loading="lazy"
                         />
                       </div>
                     ))}
@@ -350,6 +380,19 @@ export function ProjectCaseStudy({ project, sections, profile }: ProjectCaseStud
                     />
                   </div>
                 )}
+                {(systemSection?.stacked_images?.length ?? 0) > 0 && (
+                  <div className="flex flex-col gap-4">
+                    {(systemSection.stacked_images ?? []).slice(0, 3).map((url, idx) => (
+                      <div key={idx} className="overflow-hidden rounded-md">
+                        <ProjectSectionImage
+                          src={url}
+                          alt={`${systemSection?.heading ?? "System"} ${idx + 1}`}
+                          loading="lazy"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </SectionBlock>
               {systemGallery.length >= 1 && (
                 <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -365,22 +408,26 @@ export function ProjectCaseStudy({ project, sections, profile }: ProjectCaseStud
             return (
               <div key={sec.id}>
               <SectionBlock show={galleryImages.length > 0}>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {galleryImages.map((url: string, i: number) => (
-                    <div
-                      key={i}
-                      className="relative aspect-video overflow-hidden rounded-md bg-muted"
-                    >
-                      <ProjectImage
-                        src={url}
-                        alt={`Gallery ${i + 1}`}
-                        fill
-                        sizes="(max-width: 640px) 100vw, 33vw"
-                        loading="lazy"
-                        className="object-cover"
-                      />
+                <div className="py-8">
+                  <div className="overflow-hidden">
+                    <div className="flex w-max animate-marquee gap-4">
+                      {[...galleryImages, ...galleryImages].map((url: string, i: number) => (
+                        <div
+                          key={i}
+                          className="relative h-48 w-72 shrink-0 overflow-hidden rounded-md bg-muted sm:h-56 sm:w-80"
+                        >
+                          <ProjectImage
+                            src={url}
+                            alt={`Gallery ${(i % galleryImages.length) + 1}`}
+                            fill
+                            sizes="320px"
+                            loading="lazy"
+                            className="object-cover"
+                          />
+                        </div>
+                      ))}
                     </div>
-                    ))}
+                  </div>
                 </div>
               </SectionBlock>
               {gallerySectionGallery.length >= 1 && (

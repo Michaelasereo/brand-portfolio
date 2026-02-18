@@ -47,6 +47,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
       image: existing?.image ?? "",
       tag_color: existing?.tag_color ?? "",
       gallery_images: existing?.gallery_images ?? [],
+      stacked_images: (existing?.stacked_images ?? []).slice(0, 3),
     };
   });
 
@@ -125,6 +126,7 @@ export function ProjectForm({ project }: ProjectFormProps) {
   const [companyLogoFile, setCompanyLogoFile] = useState<File | null>(null);
   const [sectionImageFiles, setSectionImageFiles] = useState<(File | null)[]>([]);
   const [sectionGalleryFiles, setSectionGalleryFiles] = useState<(File[] | null)[]>([]);
+  const [sectionStackedFiles, setSectionStackedFiles] = useState<(File[] | null)[]>([]);
   const [sectionGalleryFilesById, setSectionGalleryFilesById] = useState<Record<string, File[]>>({});
 
   async function handleSubmit(e: React.FormEvent) {
@@ -192,11 +194,22 @@ export function ProjectForm({ project }: ProjectFormProps) {
         } else {
           gallery_images = gallery_images.slice(0, 4);
         }
+        let stacked_images = (s.stacked_images ?? []).filter(Boolean).slice(0, 3);
+        const stackedFiles = sectionStackedFiles[i];
+        if (stackedFiles?.length) {
+          const uploaded = await Promise.all(
+            stackedFiles.map((f, j) =>
+              uploadFile(f, `section-${i}-stacked-${Date.now()}-${j}`)
+            )
+          );
+          stacked_images = [...stacked_images, ...uploaded].slice(0, 3);
+        }
         sections.push({
           ...s,
           tag_color: s.tag_color || undefined,
           image,
           gallery_images,
+          stacked_images: stacked_images.length ? stacked_images : undefined,
         });
       }
       const sectionsFiltered = sections.filter(
@@ -204,7 +217,8 @@ export function ProjectForm({ project }: ProjectFormProps) {
           s.heading ||
           s.description ||
           s.image ||
-          (s.gallery_images ?? []).length > 0
+          (s.gallery_images ?? []).length > 0 ||
+          (s.stacked_images ?? []).length > 0
       );
 
       const sectionGalleries: Record<string, string[]> = {};
@@ -714,6 +728,43 @@ export function ProjectForm({ project }: ProjectFormProps) {
                 />
               </div>
             )}
+            <div className="space-y-2">
+              <Label>Stacked images (optional, max 3; display vertically)</Label>
+              <Input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e) => {
+                  setSectionStackedFiles((prev) => {
+                    const next = [...prev];
+                    next[i] = Array.from(e.target.files ?? []).slice(0, 3);
+                    return next;
+                  });
+                }}
+              />
+              <Textarea
+                value={(section.stacked_images ?? []).join("\n")}
+                onChange={(e) =>
+                  setFormData((d) => ({
+                    ...d,
+                    sections: d.sections.map((s, j) =>
+                      j === i
+                        ? {
+                            ...s,
+                            stacked_images: e.target.value
+                              .split("\n")
+                              .map((u) => u.trim())
+                              .filter(Boolean)
+                              .slice(0, 3),
+                          }
+                        : s
+                    ),
+                  }))
+                }
+                rows={2}
+                placeholder="One URL per line (max 3)"
+              />
+            </div>
           </div>
         ))}
       </div>
